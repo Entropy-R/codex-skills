@@ -522,7 +522,7 @@ def generate_task_scripts(
     run_cmd_text = f"""@echo off
 setlocal
 set "CODEX_HOME={home}"
-"{sys.executable}" "{script_path}" --codex-home "{home}" --output-dir "{out_dir}" snapshot --quiet >> "{task_log}" 2>&1
+"{sys.executable}" "{script_path}" --codex-home "{home}" --output-dir "{out_dir}" --timeout 50 snapshot --quiet >> "{task_log}" 2>&1
 exit /b %ERRORLEVEL%
 """
     install_ps1_text = f"""$TaskName = "{TASK_NAME}"
