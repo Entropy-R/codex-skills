@@ -4,8 +4,6 @@
 
 每个 skill 都放在独立目录中，包含自己的 `SKILL.md`、脚本、配置和说明文档，方便按需安装、迁移和继续扩展。
 
-当前仓库先收录了 `codex-status-check`：它用于查看当前机器的 Codex 版本，并结合 OpenAI Codex changelog、GitHub releases 和 GitHub compare patch，说明从当前版本升级到新版本后实际发生了什么变化。
-
 ## Repository Layout
 
 ```text
@@ -40,6 +38,12 @@ skills/<skill-name>/
 | Skill | 调用方式 | 用途 |
 | --- | --- | --- |
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
+
+### codex-status-check
+
+`codex-status-check` 用于查看当前机器上的 Codex 版本，并结合 OpenAI Codex changelog、GitHub releases 和 GitHub compare patch，说明从当前版本升级到新版本后实际发生了什么变化。
+
+它会区分“与当前 CLI 版本相关的同通道更新”和“仅供参考的其它工程发布”，避免把 alpha/stable 等不同通道的更新混在一起。对于 release note 过于简略的版本，它会尝试读取 GitHub compare patch，补充 commit 摘要、影响说明和涉及文件范围。
 
 ## Install A Skill
 
