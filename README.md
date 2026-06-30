@@ -1,11 +1,17 @@
 # Codex Skills
 
-这是一个用于管理多个 Codex skill 的本地聚合仓库。每个 skill 都放在独立目录中，便于后续手动上传到 GitHub、迁移到其它机器，或按需复制到 Codex skills 目录。
+Codex Skills 是一个用于收集、维护和复用 Codex skill 的聚合仓库。它不是单个工具项目，而是一个面向 Codex 使用场景的 skills library：每个 skill 都放在独立目录中，包含自己的 `SKILL.md`、脚本、配置和说明文档，方便按需安装、迁移和继续扩展。
 
-## 目录结构
+这个仓库适合用于管理一组围绕 Codex 日常工作的自动化能力，例如版本更新查询、项目文档工作流、代码审查辅助、环境检查、资料处理等。相比为每个小 skill 单独创建一个 GitHub 仓库，聚合仓库更适合个人或团队沉淀一套可复用的 Codex 工作流资产。
+
+当前仓库先收录了 `codex-status-check`：它用于查看当前机器的 Codex 版本，并结合 OpenAI Codex changelog、GitHub releases 和 GitHub compare patch，说明从当前版本升级到新版本后实际发生了什么变化。
+
+## Repository Layout
 
 ```text
 codex-skills/
+  README.md
+  .gitignore
   skills/
     codex-status-check/
       README.md
@@ -16,19 +22,26 @@ codex-skills/
         codex_status_check.py
 ```
 
-后续新增 skill 时，继续使用：
+新增 skill 时，继续放到：
 
 ```text
 skills/<skill-name>/
 ```
 
-## 当前 Skills
+每个 skill 目录建议至少包含：
+
+- `SKILL.md`：Codex skill 定义和触发说明。
+- `README.md`：面向使用者的安装、调用和功能说明。
+- `scripts/`：skill 需要调用的辅助脚本。
+- `agents/`：可选的 Codex UI 展示配置。
+
+## Included Skills
 
 | Skill | 调用方式 | 用途 |
 | --- | --- | --- |
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
 
-## 安装单个 Skill
+## Install A Skill
 
 将需要的 skill 复制到 Codex skills 目录：
 
@@ -44,7 +57,7 @@ Copy-Item -Recurse -Force $source $target
 ~/.codex/skills/codex-status-check
 ```
 
-## 使用方式
+## Usage
 
 在 Codex 中直接调用：
 
@@ -52,29 +65,25 @@ Copy-Item -Recurse -Force $source $target
 $codex-status-check
 ```
 
-也可以用自然语言触发，例如：
+也可以用自然语言触发：
 
 ```text
 查看 Codex 当前版本和可升级版本的更新内容
 ```
 
-## 隐私与脱敏
+具体功能、数据来源和输出格式请查看对应 skill 目录下的 README：
 
-这个仓库不应包含以下内容：
-
-- 本机绝对路径，例如用户目录、工作盘路径、应用安装路径。
-- Codex 本地配置、SQLite 状态库、运行快照、日志、缓存。
-- 账号、令牌、API key、cookie 或其它凭据。
-- `__pycache__`、`.pyc`、虚拟环境、构建产物。
-
-仓库中的脚本如需展示本机路径，应使用 `~` 替代用户主目录，避免在公开仓库或 issue 中暴露本机用户名。
-
-## 上传前检查
-
-上传到 GitHub 前建议运行：
-
-```powershell
-rg -n "<your-user-name>|<local-workspace-path>|<app-data-path>|<local-executable-path-field>" .
+```text
+skills/codex-status-check/README.md
 ```
 
-如果扫描有命中，确认是否属于说明性占位或需要继续脱敏。
+## Development
+
+添加新 skill 时建议遵循以下约定：
+
+- 每个 skill 独立放在 `skills/<skill-name>/`。
+- 内部标识、目录名和脚本名使用稳定英文名称。
+- 面向用户的标题、README 和调用说明可以使用中文。
+- 不同 skill 之间不要共享临时文件、缓存或本机配置。
+- 如果 skill 需要脚本支持，将脚本放在该 skill 自己的 `scripts/` 目录中。
+
