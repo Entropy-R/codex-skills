@@ -1,8 +1,8 @@
 # Codex Skills
 
-Codex Skills 是一个用于收集、维护和复用 Codex skill 的聚合仓库。它不是单个工具项目，而是一个面向 Codex 使用场景的 skills library：每个 skill 都放在独立目录中，包含自己的 `SKILL.md`、脚本、配置和说明文档，方便按需安装、迁移和继续扩展。
+这是我的个人 Codex skill 仓库，用来收集和自开发一些好用的 Codex skills。
 
-这个仓库适合用于管理一组围绕 Codex 日常工作的自动化能力，例如版本更新查询、项目文档工作流、代码审查辅助、环境检查、资料处理等。相比为每个小 skill 单独创建一个 GitHub 仓库，聚合仓库更适合个人或团队沉淀一套可复用的 Codex 工作流资产。
+每个 skill 都放在独立目录中，包含自己的 `SKILL.md`、脚本、配置和说明文档，方便按需安装、迁移和继续扩展。
 
 当前仓库先收录了 `codex-status-check`：它用于查看当前机器的 Codex 版本，并结合 OpenAI Codex changelog、GitHub releases 和 GitHub compare patch，说明从当前版本升级到新版本后实际发生了什么变化。
 
@@ -86,4 +86,3 @@ skills/codex-status-check/README.md
 - 面向用户的标题、README 和调用说明可以使用中文。
 - 不同 skill 之间不要共享临时文件、缓存或本机配置。
 - 如果 skill 需要脚本支持，将脚本放在该 skill 自己的 `scripts/` 目录中。
-
