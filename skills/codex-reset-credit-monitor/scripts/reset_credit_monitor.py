@@ -487,6 +487,14 @@ def default_start_time(start_time: str | None) -> str:
     return (dt.datetime.now() + dt.timedelta(minutes=5)).strftime("%H:%M")
 
 
+def schedule_parts(hours: int) -> tuple[str, int, str]:
+    validate_hours(hours)
+    if hours % 24 == 0:
+        days = hours // 24
+        return "DAILY", days, f"every {days} day(s)"
+    return "HOURLY", hours, f"every {hours} hour(s)"
+
+
 def write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as fh:
@@ -509,6 +517,7 @@ def generate_task_scripts(
     remove_ps1 = task_dir / "remove_task.ps1"
     metadata = task_dir / "task_config.json"
     task_log = task_dir / "task-run.log"
+    schedule, modifier, interval_label = schedule_parts(hours)
 
     run_cmd_text = f"""@echo off
 setlocal
@@ -519,7 +528,7 @@ exit /b %ERRORLEVEL%
     install_ps1_text = f"""$TaskName = "{TASK_NAME}"
 $RunScript = "{run_cmd}"
 $TaskRun = "cmd.exe /c `"$RunScript`""
-schtasks.exe /Create /TN $TaskName /SC HOURLY /MO {hours} /ST "{start_time}" /TR $TaskRun /F
+schtasks.exe /Create /TN $TaskName /SC {schedule} /MO {modifier} /ST "{start_time}" /TR $TaskRun /F
 """
     remove_ps1_text = f"""$TaskName = "{TASK_NAME}"
 schtasks.exe /Delete /TN $TaskName /F
@@ -528,6 +537,8 @@ schtasks.exe /Delete /TN $TaskName /F
         {
             "task_name": TASK_NAME,
             "hours": hours,
+            "schedule": schedule,
+            "modifier": modifier,
             "start_time": start_time,
             "python": sys.executable,
             "monitor_script": str(script_path),
@@ -550,6 +561,7 @@ schtasks.exe /Delete /TN $TaskName /F
         "metadata": str(metadata),
         "task_log": str(task_log),
         "hours": str(hours),
+        "interval_label": interval_label,
         "start_time": start_time,
     }
 
@@ -563,7 +575,7 @@ def render_generated_scripts(paths: dict[str, str]) -> str:
             f"- remove script: {redact_path(paths['remove_ps1'])}",
             f"- metadata: {redact_path(paths['metadata'])}",
             f"- task log: {redact_path(paths['task_log'])}",
-            f"- interval: every {paths['hours']} hour(s), start at {paths['start_time']}",
+            f"- interval: {paths['interval_label']}, start at {paths['start_time']}",
         ]
     )
 
@@ -573,6 +585,7 @@ def install_task(run_script: Path, hours: int, start_time: str | None) -> tuple[
         return 1, "计划任务安装仅支持 Windows。"
     validate_hours(hours)
     start_time = default_start_time(start_time)
+    schedule, modifier, _ = schedule_parts(hours)
     command = f'cmd.exe /c "{run_script}"'
     return run_schtasks(
         [
@@ -580,9 +593,9 @@ def install_task(run_script: Path, hours: int, start_time: str | None) -> tuple[
             "/TN",
             TASK_NAME,
             "/SC",
-            "HOURLY",
+            schedule,
             "/MO",
-            str(hours),
+            str(modifier),
             "/ST",
             start_time,
             "/TR",
