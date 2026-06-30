@@ -4,7 +4,7 @@
 
 每个 skill 都放在独立目录中，包含自己的 `SKILL.md`、脚本、配置和说明文档，方便按需安装、迁移和继续扩展。
 
-## Repository Layout
+## Repository Architecture
 
 ```text
 codex-skills/
@@ -20,18 +20,9 @@ codex-skills/
         codex_status_check.py
 ```
 
-新增 skill 时，继续放到：
+这个仓库采用聚合式结构：仓库根目录只放整体说明和通用配置，所有可用的 Codex skill 都放在 `skills/` 下。每个 skill 都是一个相对独立的单元，可以单独复制、安装和使用。
 
-```text
-skills/<skill-name>/
-```
-
-每个 skill 目录建议至少包含：
-
-- `SKILL.md`：Codex skill 定义和触发说明。
-- `README.md`：面向使用者的安装、调用和功能说明。
-- `scripts/`：skill 需要调用的辅助脚本。
-- `agents/`：可选的 Codex UI 展示配置。
+`skills/<skill-name>/SKILL.md` 是 Codex 识别 skill 的核心文件；`README.md` 用来说明该 skill 的用途和调用方式；`scripts/` 和 `agents/` 则按需存放辅助脚本和展示配置。
 
 ## Included Skills
 
@@ -45,9 +36,11 @@ skills/<skill-name>/
 
 它会区分“与当前 CLI 版本相关的同通道更新”和“仅供参考的其它工程发布”，避免把 alpha/stable 等不同通道的更新混在一起。对于 release note 过于简略的版本，它会尝试读取 GitHub compare patch，补充 commit 摘要、影响说明和涉及文件范围。
 
-## Install A Skill
+## How To Use These Skills
 
-将需要的 skill 复制到 Codex skills 目录：
+如果你想使用仓库里的某个 skill，可以只复制对应的 skill 子目录，不需要复制整个仓库。
+
+以 `codex-status-check` 为例，先克隆或下载本仓库，然后在仓库根目录执行：
 
 ```powershell
 $source = ".\skills\codex-status-check"
@@ -55,15 +48,13 @@ $target = Join-Path $env:CODEX_HOME "skills\codex-status-check"
 Copy-Item -Recurse -Force $source $target
 ```
 
-如果没有设置 `CODEX_HOME`，通常可以使用：
+如果没有设置 `CODEX_HOME`，通常可以把 skill 复制到：
 
 ```text
 ~/.codex/skills/codex-status-check
 ```
 
-## Usage
-
-在 Codex 中直接调用：
+安装完成后，在 Codex 中直接调用：
 
 ```text
 $codex-status-check
@@ -80,13 +71,3 @@ $codex-status-check
 ```text
 skills/codex-status-check/README.md
 ```
-
-## Development
-
-添加新 skill 时建议遵循以下约定：
-
-- 每个 skill 独立放在 `skills/<skill-name>/`。
-- 内部标识、目录名和脚本名使用稳定英文名称。
-- 面向用户的标题、README 和调用说明可以使用中文。
-- 不同 skill 之间不要共享临时文件、缓存或本机配置。
-- 如果 skill 需要脚本支持，将脚本放在该 skill 自己的 `scripts/` 目录中。
