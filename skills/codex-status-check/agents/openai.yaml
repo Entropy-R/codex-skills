@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex 更新查询"
+  short_description: "查询 Codex 最近更新日志和本机版本"
+  default_prompt: "Use $codex-status-check to summarize recent Codex updates and show the current machine's Codex version."
+policy:
+  allow_implicit_invocation: true
