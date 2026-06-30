@@ -516,14 +516,24 @@ def generate_task_scripts(
     install_ps1 = task_dir / "install_task.ps1"
     remove_ps1 = task_dir / "remove_task.ps1"
     metadata = task_dir / "task_config.json"
-    task_log = task_dir / "task-run.log"
     schedule, modifier, interval_label = schedule_parts(hours)
+    proxy_lines = []
+    for env_name in ["HTTP_PROXY", "HTTPS_PROXY", "all_proxy", "no_proxy"]:
+        env_value = os.environ.get(env_name)
+        if env_value:
+            proxy_lines.append(f'set "{env_name}={env_value.replace(chr(34), "")}"')
+    proxy_lines_text = "\n".join(proxy_lines)
 
     run_cmd_text = f"""@echo off
 setlocal
 set "CODEX_HOME={home}"
-"{sys.executable}" "{script_path}" --codex-home "{home}" --output-dir "{out_dir}" --timeout 50 snapshot --quiet >> "{task_log}" 2>&1
-exit /b %ERRORLEVEL%
+{proxy_lines_text}
+"{sys.executable}" "{script_path}" --codex-home "{home}" --output-dir "{out_dir}" --timeout 50 snapshot
+set "MONITOR_EXIT=%ERRORLEVEL%"
+echo.
+echo Codex reset credit monitor exit code: %MONITOR_EXIT%
+pause
+exit /b %MONITOR_EXIT%
 """
     install_ps1_text = f"""$TaskName = "{TASK_NAME}"
 $RunScript = "{run_cmd}"
@@ -559,7 +569,6 @@ schtasks.exe /Delete /TN $TaskName /F
         "install_ps1": str(install_ps1),
         "remove_ps1": str(remove_ps1),
         "metadata": str(metadata),
-        "task_log": str(task_log),
         "hours": str(hours),
         "interval_label": interval_label,
         "start_time": start_time,
@@ -574,7 +583,6 @@ def render_generated_scripts(paths: dict[str, str]) -> str:
             f"- install script: {redact_path(paths['install_ps1'])}",
             f"- remove script: {redact_path(paths['remove_ps1'])}",
             f"- metadata: {redact_path(paths['metadata'])}",
-            f"- task log: {redact_path(paths['task_log'])}",
             f"- interval: {paths['interval_label']}, start at {paths['start_time']}",
         ]
     )
