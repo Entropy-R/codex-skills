@@ -47,11 +47,13 @@ If `CODEX_HOME` is not set, use your Codex home directory, usually `~/.codex`.
 - Explain history changes from local JSONL snapshots.
 - Generate local wrapper scripts for Windows Task Scheduler.
 - Install, inspect, run, or remove the Windows Scheduled Task `CodexResetCreditMonitor`.
+- Render status output as a decision-oriented report with a conclusion, reset-credit table, usage-window table, and recommendations.
 
 ## Safety Rules
 
 - Do not print tokens, raw `auth.json`, mailbox address, user id, or account id.
 - Treat the backend request as read-only; never redeem reset credits.
+- For status output, prefer concise user-facing recommendations over raw field dumps.
 - Prefer a 6-hour task interval unless the user explicitly asks otherwise.
 - Accept user-defined intervals with `--hours N` or duration expressions such as `10h`, `1d`, `10hours`, `10小时`; allowed range is 1 to 168 hours.
 - Do not use Codex automations for periodic polling unless the user explicitly requests that; Windows Task Scheduler avoids model/token usage.
