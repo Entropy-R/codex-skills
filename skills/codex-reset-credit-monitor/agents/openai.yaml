@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex 重置机会监控"
+  short_description: "查看重置机会到期时间并维护定时监控。"
+  default_prompt: "Use $codex-reset-credit-monitor to show the current available reset credits and each expiry time."
+policy:
+  allow_implicit_invocation: true
