@@ -26,6 +26,8 @@ If `CODEX_HOME` is not set, replace it with your Codex home directory, usually `
 The script output includes:
 
 - Current machine Codex version information from local Codex config, `codex --version`, and the latest local thread metadata.
+- Windows desktop Appx package version when available.
+- Recent desktop app version signals from local Codex desktop logs, including `OpenAI.Codex_*`, internal `release=*`, app-server CLI version, and bundled CLI path.
 - A relevance baseline based on the current configured CLI version when available.
 - GitHub releases that are relevant to the current CLI channel and version, including upgrade compare details from the current version to the newer version.
 - Detailed upgrade entries with commit title, extracted summary, inferred impact, and changed-file scope when compare data supports it.
@@ -42,4 +44,5 @@ The script output includes:
 - For current-version-relevant updates, summarize the diff from the installed/current CLI version to the target version so the user can understand what changed after updating.
 - Prefer detailed, reader-facing upgrade explanations over terse release-note text when compare data is available.
 - Treat official product changelog items as product news that is not filtered by local CLI version.
+- Treat local desktop app log entries as machine-local evidence that an app package or runtime changed; do not infer user-visible changes unless official changelog or release notes support it.
 - Do not infer user-visible changes from empty release notes unless compare data supports the summary.

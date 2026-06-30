@@ -23,6 +23,7 @@ CODEX_CHANGELOG_RSS_URL = "https://developers.openai.com/codex/changelog/rss.xml
 GITHUB_RELEASES_ATOM_URL = "https://github.com/openai/codex/releases.atom"
 GITHUB_COMPARE_URL = "https://github.com/openai/codex/compare/{base}...{head}"
 X_CODEX_SEARCH_URL = "https://x.com/search?q=Codex%20(from%3AOpenAI%20OR%20from%3AOpenAIDevs)&src=typed_query&f=live"
+DESKTOP_LOG_VERSION_DAYS = 14
 
 
 class HTMLText(HTMLParser):
@@ -47,11 +48,28 @@ def codex_home() -> Path:
     return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
 
 
+def local_app_data() -> Path:
+    return Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local")
+
+
 def redact_path(value: str) -> str:
+    if not value:
+        return value
     try:
-        path = Path(value)
-        home = Path.home()
-        return str(path).replace(str(home), "~", 1)
+        text = str(Path(value))
+        replacements = [
+            (str(Path.home()), "~"),
+            (os.environ.get("LOCALAPPDATA") or "", "%LOCALAPPDATA%"),
+            (os.environ.get("APPDATA") or "", "%APPDATA%"),
+            (os.environ.get("ProgramFiles") or "", "%ProgramFiles%"),
+            (os.environ.get("ProgramFiles(x86)") or "", "%ProgramFiles(x86)%"),
+        ]
+        for prefix, replacement in replacements:
+            if prefix and text.lower().startswith(prefix.lower()):
+                return replacement + text[len(prefix) :]
+        if re.match(r"^[A-Za-z]:\\", text):
+            return "<local-drive>" + text[2:]
+        return text
     except Exception:
         return value
 
@@ -104,6 +122,108 @@ def current_versions(home: Path) -> dict[str, str]:
         except sqlite3.Error:
             pass
     return versions
+
+
+def current_desktop_package() -> dict[str, str]:
+    """Read the Windows Store/Appx desktop package version when available."""
+    if sys.platform != "win32":
+        return {}
+    command = [
+        "powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        (
+            "$pkg = Get-AppxPackage -Name OpenAI.Codex -ErrorAction SilentlyContinue; "
+            "if ($pkg) { "
+            "$pkg | Select-Object Name,PackageFullName,Version,InstallLocation,Status "
+            "| ConvertTo-Json -Compress "
+            "}"
+        ),
+    ]
+    try:
+        output = subprocess.check_output(command, text=True, stderr=subprocess.DEVNULL, timeout=8).strip()
+    except Exception:
+        return {}
+    if not output:
+        return {}
+    try:
+        import json
+
+        data = json.loads(output)
+    except Exception:
+        return {}
+    if isinstance(data, list):
+        data = data[0] if data else {}
+    return {
+        "name": str(data.get("Name") or ""),
+        "package_full_name": str(data.get("PackageFullName") or ""),
+        "version": str(data.get("Version") or ""),
+        "install_location": redact_path(str(data.get("InstallLocation") or "")),
+        "status": str(data.get("Status") or ""),
+    }
+
+
+def desktop_log_dirs(days: int = DESKTOP_LOG_VERSION_DAYS) -> list[Path]:
+    root = local_app_data() / "Codex" / "Logs"
+    if not root.exists():
+        return []
+    today = dt.datetime.now().date()
+    dirs: list[Path] = []
+    for offset in range(days):
+        day = today - dt.timedelta(days=offset)
+        candidate = root / f"{day:%Y}" / f"{day:%m}" / f"{day:%d}"
+        if candidate.exists():
+            dirs.append(candidate)
+    return dirs
+
+
+def desktop_log_versions(days: int = DESKTOP_LOG_VERSION_DAYS) -> list[dict[str, str]]:
+    """Extract desktop package and internal release versions seen in recent desktop logs."""
+    records: dict[tuple[str, str, str], dict[str, str]] = {}
+    package_pattern = re.compile(r"OpenAI\.Codex_(\d+\.\d+\.\d+\.0)")
+    release_pattern = re.compile(r"\brelease=(\d+\.\d+\.\d+)\b")
+    app_server_pattern = re.compile(r"Current reported app-server version: currentVersion=([^\s]+)")
+    cli_path_pattern = re.compile(r"codexCliPath=([^\s]+codex\.exe)")
+    cutoff = dt.datetime.now() - dt.timedelta(days=days)
+
+    for directory in desktop_log_dirs(days):
+        for log_file in sorted(directory.glob("*.log")):
+            try:
+                stat = log_file.stat()
+            except OSError:
+                continue
+            modified = dt.datetime.fromtimestamp(stat.st_mtime)
+            if modified < cutoff:
+                continue
+            try:
+                text = log_file.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            snippets = [
+                ("desktop_package", package_pattern),
+                ("internal_release", release_pattern),
+                ("app_server", app_server_pattern),
+                ("bundled_cli_path", cli_path_pattern),
+            ]
+            for kind, pattern in snippets:
+                for match in pattern.finditer(text):
+                    value = match.group(1).strip().strip('"')
+                    if kind == "bundled_cli_path":
+                        value = redact_path(value)
+                    key = (kind, value, directory.name)
+                    existing = records.get(key)
+                    if not existing or modified > dt.datetime.fromisoformat(existing["last_seen_iso"]):
+                        records[key] = {
+                            "kind": kind,
+                            "value": value,
+                            "log_date": directory.name,
+                            "last_seen": modified.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+                            "last_seen_iso": modified.isoformat(),
+                            "log_file": redact_path(str(log_file)),
+                        }
+
+    return sorted(records.values(), key=lambda item: (item["last_seen_iso"], item["kind"], item["value"]), reverse=True)
 
 
 def parse_codex_version(value: str | None) -> tuple[int, int, int, str | None, int | None] | None:
@@ -541,14 +661,21 @@ def related_github_updates(releases: list[dict[str, Any]], current: tuple[int, i
 def build_payload(args: argparse.Namespace) -> dict[str, Any]:
     home = Path(args.codex_home) if args.codex_home else codex_home()
     versions = current_versions(home)
+    desktop_package = current_desktop_package()
+    desktop_log_items = desktop_log_versions()
     product_updates, product_error = get_product_updates(args.count)
     github_updates, github_error = get_github_updates(args.count)
     current_cli = current_cli_tuple(versions)
     annotate_release_relevance(github_updates, current_cli)
     return {
         "generated_at": dt.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
-        "codex_home": str(home),
+        "codex_home": redact_path(str(home)),
         "versions": versions,
+        "desktop": {
+            "package": desktop_package,
+            "log_days": DESKTOP_LOG_VERSION_DAYS,
+            "log_items": desktop_log_items,
+        },
         "primary_cli_version": primary_cli_version(versions),
         "updates": {
             "product_source": CODEX_CHANGELOG_RSS_URL,
@@ -573,6 +700,32 @@ def render_markdown(payload: dict[str, Any]) -> str:
     primary = payload.get("primary_cli_version")
     if primary:
         lines.append(f"- 版本相关性判断基准：{primary['source']}（{primary['version']}）")
+
+    desktop = payload.get("desktop") or {}
+    package = desktop.get("package") or {}
+    log_items = desktop.get("log_items") or []
+    lines.extend(["", "## 本机桌面版状态与更新痕迹"])
+    if package:
+        lines.append(f"- 当前 Windows 桌面包：{package.get('package_full_name') or package.get('version')}")
+        if package.get("install_location"):
+            lines.append(f"  安装位置：{package['install_location']}")
+    else:
+        lines.append("- 未从 Windows Appx 包信息中识别到 OpenAI.Codex 桌面版。")
+    if log_items:
+        lines.append(f"- 最近 {desktop.get('log_days', DESKTOP_LOG_VERSION_DAYS)} 天桌面日志中捕捉到的版本信号：")
+        for item in log_items[:12]:
+            kind_label = {
+                "desktop_package": "桌面包",
+                "internal_release": "内部 release",
+                "app_server": "App server/CLI",
+                "bundled_cli_path": "随附 CLI 路径",
+            }.get(item.get("kind"), item.get("kind", "unknown"))
+            lines.append(
+                f"  - {item.get('log_date')} {kind_label}: {item.get('value')}，最后出现：{item.get('last_seen')}"
+            )
+    else:
+        lines.append(f"- 最近 {desktop.get('log_days', DESKTOP_LOG_VERSION_DAYS)} 天桌面日志中未提取到版本信号。")
+    lines.append("- 说明：桌面日志只能证明本机安装包或运行时版本发生过变化；若官方 changelog 未发布对应条目，不推断用户可见变更。")
 
     updates = payload["updates"]
     lines.extend(["", "## 与当前 CLI 版本相关的 GitHub 更新"])
@@ -622,6 +775,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description="Query recent Codex updates.")
     parser.add_argument("command", nargs="?", choices=["updates"], default="updates", help="Query recent updates.")
     parser.add_argument("--count", type=int, default=3, help="Number of update entries to show per source.")

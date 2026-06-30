@@ -48,6 +48,7 @@ If `CODEX_HOME` is not set, use your Codex home directory, usually `~/.codex`.
 - Generate local wrapper scripts for Windows Task Scheduler.
 - Install, inspect, run, or remove the Windows Scheduled Task `CodexResetCreditMonitor`.
 - Render status output as a decision-oriented report with a conclusion, reset-credit table, usage-window table, and recommendations.
+- Generated task wrappers preserve proxy environment variables when present and pause after printing the report so a user-triggered task window can be inspected.
 
 ## Safety Rules
 
