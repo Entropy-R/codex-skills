@@ -14,6 +14,8 @@ $codex-reset-credit-monitor
 
 默认行为是查看当前可用 reset credit 数量和每个机会的到期时间。
 
+状态输出会优先给出结论，然后用表格展示 reset credit 到期明细和当前用量窗口，最后给出是否需要使用 reset credit 的建议。
+
 常见用法：
 
 ```text

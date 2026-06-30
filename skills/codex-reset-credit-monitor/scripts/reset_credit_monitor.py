@@ -264,45 +264,156 @@ def summarize_history(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def window_label(window: dict[str, Any] | None) -> str:
+def days_left_text(value: Any, now: dt.datetime | None = None) -> str:
+    parsed = parse_ts(value)
+    if parsed is None:
+        return "未知"
+    now = now or now_local()
+    days = (parsed.astimezone() - now).total_seconds() / 86400
+    if days < 0:
+        return "已过期"
+    if days < 1:
+        hours = days * 24
+        return f"{hours:.1f} 小时"
+    return f"{days:.1f} 天"
+
+
+def credit_title(credit: dict[str, Any]) -> str:
+    title = credit.get("title") or credit.get("reset_type") or "reset credit"
+    replacements = {
+        "Full reset (Weekly + 5 hr)": "Full reset（周窗口 + 5 小时窗口）",
+        "Weekly + 5 hr": "周窗口 + 5 小时窗口",
+    }
+    return replacements.get(title, title)
+
+
+def status_label(status: Any) -> str:
+    labels = {
+        "available": "可用",
+        "used": "已使用",
+        "expired": "已过期",
+    }
+    return labels.get(str(status), str(status) if status else "未知")
+
+
+def window_name(window: dict[str, Any] | None) -> str:
     if not isinstance(window, dict):
         return "未知"
     minutes = window.get("window_minutes")
     if minutes == 300:
-        name = "5 小时窗口"
-    elif minutes == 10080:
-        name = "7 天窗口"
+        return "5 小时窗口"
+    if minutes == 10080:
+        return "7 天窗口"
+    return f"{minutes or '未知'} 分钟窗口"
+
+
+def percent_text(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return f"{value:g}%"
+    return f"{value}%" if value not in {None, ""} else "未知"
+
+
+def remaining_percent_text(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return f"{max(0, 100 - value):g}%"
+    return "未知"
+
+
+def sorted_credits(credits: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def key(credit: dict[str, Any]) -> dt.datetime:
+        return parse_ts(credit.get("expires_at")) or dt.datetime.max.replace(tzinfo=dt.timezone.utc)
+
+    return sorted(credits, key=key)
+
+
+def render_recommendations(snapshot: dict[str, Any]) -> list[str]:
+    warning = snapshot.get("warning") or {}
+    usage = snapshot.get("usage") or {}
+    available_count = snapshot.get("available_count")
+    days_left = warning.get("days_left")
+    primary = usage.get("primary") if isinstance(usage.get("primary"), dict) else {}
+    primary_used = primary.get("used_percent")
+    primary_reset = fmt_datetime(primary.get("resets_at"))
+    lines: list[str] = []
+
+    if available_count:
+        if isinstance(days_left, (int, float)) and days_left <= 7:
+            lines.append(f"- 最早一张重置机会还有 {days_left:.1f} 天到期，建议优先关注是否需要使用。")
+        elif isinstance(days_left, (int, float)):
+            lines.append(f"- 当前不需要急着使用重置机会，最早到期还有 {days_left:.1f} 天。")
+        else:
+            lines.append("- 当前有可用重置机会，但未识别到明确到期时间，建议手动确认。")
     else:
-        name = f"{minutes or '未知'} 分钟窗口"
-    return f"{name}：已用 {window.get('used_percent', '未知')}%，重置 {fmt_datetime(window.get('resets_at'))}"
+        lines.append("- 当前没有可用重置机会。")
+
+    if isinstance(primary_used, (int, float)):
+        if primary_used < 80:
+            lines.append(f"- 5 小时窗口已用 {primary_used:g}%，通常优先等待自然恢复（{primary_reset}）。")
+        else:
+            lines.append(f"- 5 小时窗口已用 {primary_used:g}%，如果有紧急任务，再考虑是否使用 reset credit。")
+    lines.append("- reset credit 更适合在周窗口或 5 小时窗口接近耗尽、且任务紧急时使用。")
+    return lines
 
 
 def render_status(snapshot: dict[str, Any]) -> str:
+    warning = snapshot.get("warning") or {}
+    credits = sorted_credits(snapshot.get("credits") or [])
+    usage = snapshot.get("usage") or {}
+    available_count = snapshot.get("available_count")
+    days_left = warning.get("days_left")
+    reference_time = parse_ts(snapshot.get("queried_at")) or now_local()
+    if isinstance(days_left, (int, float)):
+        risk_text = "暂无临期风险" if days_left > 7 else "存在临期风险"
+        conclusion = f"当前有 {available_count} 次可用重置机会，最早一张将在 {days_left:.1f} 天后到期，{risk_text}。"
+        warning_text = f"最早到期时间还有 {days_left:.1f} 天。"
+    else:
+        conclusion = f"当前有 {available_count} 次可用重置机会，暂未识别到明确到期时间。"
+        warning_text = warning.get("message", "")
+
     lines = [
         "# Codex 重置机会状态",
         "",
+        f"结论：{conclusion}",
+        "",
+        "## 概览",
         f"- 查询时间：{fmt_datetime(snapshot.get('queried_at'))}",
         f"- 数据来源：{snapshot.get('source')}",
         f"- 可用重置机会：{snapshot.get('available_count')}",
     ]
-    usage = snapshot.get("usage") or {}
     if usage:
         lines.append(f"- 账号计划：{usage.get('plan_type') or '未知'}")
-        lines.append(f"- {window_label(usage.get('primary'))}")
-        lines.append(f"- {window_label(usage.get('secondary'))}")
-    warning = snapshot.get("warning") or {}
-    lines.append(f"- 到期提醒：{warning.get('level', 'unknown')}，{warning.get('message', '')}")
-    credits = snapshot.get("credits") or []
+    lines.append(f"- 到期提醒：{warning.get('level', 'unknown')}，{warning_text}")
+
     if credits:
         lines.append("")
-        lines.append("## 到期明细")
-        for index, credit in enumerate(credits, 1):
+        lines.append("## 重置机会")
+        lines.append("| 类型 | 状态 | 发放时间 | 到期时间 | 剩余时间 |")
+        lines.append("| --- | --- | --- | --- | --- |")
+        for credit in credits:
             lines.append(
-                f"{index}. {credit.get('title') or credit.get('reset_type') or 'reset credit'}："
-                f"状态={credit.get('status') or '未知'}，"
-                f"发放={fmt_datetime(credit.get('granted_at'))}，"
-                f"到期={fmt_datetime(credit.get('expires_at'))}"
+                f"| {credit_title(credit)} | {status_label(credit.get('status'))} | "
+                f"{fmt_datetime(credit.get('granted_at'))} | {fmt_datetime(credit.get('expires_at'))} | "
+                f"{days_left_text(credit.get('expires_at'), reference_time)} |"
             )
+
+    if usage:
+        lines.append("")
+        lines.append("## 当前用量窗口")
+        lines.append("| 窗口 | 已用 | 剩余 | 重置时间 |")
+        lines.append("| --- | --- | --- | --- |")
+        for window in [usage.get("primary"), usage.get("secondary")]:
+            if isinstance(window, dict):
+                used = window.get("used_percent")
+                lines.append(
+                    f"| {window_name(window)} | {percent_text(used)} | "
+                    f"{remaining_percent_text(used)} | {fmt_datetime(window.get('resets_at'))} |"
+                )
+
+    recommendations = render_recommendations(snapshot)
+    if recommendations:
+        lines.append("")
+        lines.append("## 建议")
+        lines.extend(recommendations)
     return "\n".join(lines)
 
 
