@@ -122,7 +122,7 @@ codex-skills/
 
 文档编写工作流包含 `doc-source-analysis`、`doc-template-outline`、`doc-drafting`、`doc-format-check` 和 `doc-content-proofread`，用于从资料解读、模板适配、正文起草到格式检查和内容校对完成软件项目文档。
 
-推荐顺序是资料解读、模板适配与大纲、正文编写、格式检查、内容校对。仓库不包含旧版兼容入口 `doc-review-audit`。
+推荐顺序是资料解读、模板适配与大纲、正文编写、格式检查、内容校对。
 
 ## How To Use These Skills
 
