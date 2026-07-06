@@ -1,0 +1,6 @@
+interface:
+  display_name: "文档编写 05 内容校对"
+  short_description: "按参考资料校对软件文档的事实、术语、逻辑、边界和验收风险。"
+  default_prompt: "Use $doc-content-proofread to compare the target document against my reference document, provide a content issue list for confirmation, and generate a proofread DOCX only after I approve."
+policy:
+  allow_implicit_invocation: true

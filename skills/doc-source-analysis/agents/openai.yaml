@@ -1,0 +1,6 @@
+interface:
+  display_name: "文档编写 01 资料解读"
+  short_description: "以技术协议书为主，提炼需求要点、术语、风险和待确认项。"
+  default_prompt: "Use $doc-source-analysis to analyze this technical agreement and produce requirement points, terminology, risks, and clarification questions."
+policy:
+  allow_implicit_invocation: true

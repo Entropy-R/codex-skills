@@ -1,0 +1,6 @@
+interface:
+  display_name: "文档编写 04 格式检查"
+  short_description: "按固定软件文档模板检查并统一文档结构、编号、表格和版式。"
+  default_prompt: "Use $doc-format-check to check this software project document against the fixed format template, list format changes for confirmation, and generate a format-normalized DOCX only after I approve."
+policy:
+  allow_implicit_invocation: true

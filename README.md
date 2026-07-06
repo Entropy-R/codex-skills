@@ -30,6 +30,48 @@ codex-skills/
       SKILL.md
       agents/
         openai.yaml
+    requirement-intake/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    solution-design/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    solution-review/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    doc-source-analysis/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    doc-template-outline/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    doc-drafting/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+    doc-format-check/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+      assets/
+        software-doc-format-template.md
+    doc-content-proofread/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
 ```
 
 这个仓库采用聚合式结构：仓库根目录只放整体说明和通用配置，所有可用的 Codex skill 都放在 `skills/` 下。每个 skill 都是一个相对独立的单元，可以单独复制、安装和使用。
@@ -43,6 +85,14 @@ codex-skills/
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
 | `codex-reset-credit-monitor` | `$codex-reset-credit-monitor` | 查看 Codex reset credit 数量、到期时间、历史变化，并维护 Windows 计划任务监控。 |
 | `windows-powershell-guard` | `$windows-powershell-guard` | 降低 Codex 在 Windows PowerShell、中文编码、路径操作和 shell 命令中的常见失败。 |
+| `requirement-intake` | `$requirement-intake` | 三段开发 01：整理非结构化需求，主动澄清关键问题。 |
+| `solution-design` | `$solution-design` | 三段开发 02：把澄清后的需求转换为工程实现方案。 |
+| `solution-review` | `$solution-review` | 三段开发 03：审查方案风险并整理最终可执行计划。 |
+| `doc-source-analysis` | `$doc-source-analysis` | 文档编写 01：解读技术协议和客户资料，提炼事实、术语、风险和待确认项。 |
+| `doc-template-outline` | `$doc-template-outline` | 文档编写 02：适配客户模板并生成目录、大纲和章节写作说明。 |
+| `doc-drafting` | `$doc-drafting` | 文档编写 03：基于大纲和资料解读结果起草正文。 |
+| `doc-format-check` | `$doc-format-check` | 文档编写 04：按固定模板检查并统一文档格式。 |
+| `doc-content-proofread` | `$doc-content-proofread` | 文档编写 05：对照参考资料校对事实、术语、逻辑和验收风险。 |
 
 ### codex-status-check
 
@@ -61,6 +111,18 @@ codex-skills/
 `windows-powershell-guard` 用于约束 Codex 在 Windows PowerShell 下执行命令和编辑文件时的高风险行为，尤其是中文路径、中文文件、中文日志、脚本输出编码、JSON 传参、路径安全、删除/移动文件、跨 shell 操作和 shell 启动异常等场景。
 
 它会提醒 Codex 优先使用 `apply_patch` 做手工编辑，避免默认 `echo`、`Set-Content`、`Out-File` 或重定向写中文内容；执行路径敏感操作时优先使用 `-LiteralPath` 并验证目标路径；遇到 `UnicodeDecodeError`、`CreateProcessWithLogonW failed: 1326`、`pwsh.exe` alias 等 Windows 环境问题时，先按环境和编码问题排查，而不是反复重跑同一命令。
+
+### 三段开发工作流
+
+三段开发工作流包含 `requirement-intake`、`solution-design` 和 `solution-review`，用于把不完整的软件需求逐步整理成可执行交付计划。
+
+推荐顺序是先用 `requirement-intake` 澄清需求，再用 `solution-design` 生成工程方案，最后用 `solution-review` 审查风险并固化最终实施计划。
+
+### 文档编写工作流
+
+文档编写工作流包含 `doc-source-analysis`、`doc-template-outline`、`doc-drafting`、`doc-format-check` 和 `doc-content-proofread`，用于从资料解读、模板适配、正文起草到格式检查和内容校对完成软件项目文档。
+
+推荐顺序是资料解读、模板适配与大纲、正文编写、格式检查、内容校对。仓库不包含旧版兼容入口 `doc-review-audit`。
 
 ## How To Use These Skills
 

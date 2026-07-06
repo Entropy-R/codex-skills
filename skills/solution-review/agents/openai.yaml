@@ -1,0 +1,4 @@
+interface:
+  display_name: "三段开发 03 方案审查与落地化"
+  short_description: "审查工程方案发现风险并整理最终可执行落地计划清单内容"
+  default_prompt: "请使用方案审查与落地化技能，审查这份方案并输出最终可执行工程方案。"

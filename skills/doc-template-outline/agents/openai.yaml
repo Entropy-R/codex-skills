@@ -1,0 +1,6 @@
+interface:
+  display_name: "文档编写 02 模板适配与大纲"
+  short_description: "基于客户模板和资料解读结果生成目录、大纲和章节说明。"
+  default_prompt: "Use $doc-template-outline to adapt this customer template using the doc-source-analysis result and produce an outline with section guidance."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "文档编写 03 正文编写"
+  short_description: "基于大纲和资料解读结果生成可编辑的软件文档初稿。"
+  default_prompt: "Use $doc-drafting to draft editable content for this software project document section from the outline and source-analysis result."
+policy:
+  allow_implicit_invocation: true

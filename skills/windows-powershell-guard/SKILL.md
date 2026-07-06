@@ -9,7 +9,7 @@ description: "Guardrails for Codex when running commands or editing files on Win
 
 Use this skill to reduce common failures when Codex operates in Windows PowerShell, especially in repositories with Chinese paths, Chinese documents, logs, scripts, or mixed encodings. Communicate process updates in Chinese, but keep internal reasoning private: explain key ideas, decision basis, execution steps, validation results, and remaining risks.
 
-This skill is not a permanent runtime switch by itself. If the user wants this behavior to apply by default across future Codex work, add a concise rule to the relevant `AGENTS.md` or the global `%USERPROFILE%\.codex\AGENTS.md` that says to use `$windows-powershell-guard` for Windows PowerShell, Chinese encoding, path, deletion, and shell-command tasks.
+This skill is not a permanent runtime switch by itself. If the user wants this behavior to apply by default across future Codex work, add a concise rule to the relevant `AGENTS.md` or the global Codex preferences file such as `$CODEX_HOME\AGENTS.md` or `~/.codex/AGENTS.md` that says to use `$windows-powershell-guard` for Windows PowerShell, Chinese encoding, path, deletion, and shell-command tasks.
 
 ## 核心原则
 

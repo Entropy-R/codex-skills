@@ -1,0 +1,4 @@
+interface:
+  display_name: "三段开发 01 需求理解与澄清"
+  short_description: "整理非结构化需求主动追问关键疑惑并生成清晰阶段输入包"
+  default_prompt: "请使用需求理解与澄清技能，帮我整理这段原始需求并提出必须确认的问题。"
