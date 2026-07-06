@@ -1,4 +1,4 @@
 interface:
-  display_name: "Windows PowerShell ·À»¤"
-  short_description: "½µµÍ Codex ÔÚ Windows PowerShell¡¢ÖĞÎÄ±àÂëºÍÂ·¾¶²Ù×÷ÖĞµÄ³£¼ûÊ§°Ü¡£"
+  display_name: "Windows PowerShell é˜²æŠ¤"
+  short_description: "é™ä½ Codex åœ¨ Windows PowerShellã€ä¸­æ–‡ç¼–ç å’Œè·¯å¾„æ“ä½œä¸­çš„å¸¸è§å¤±è´¥ã€‚"
   default_prompt: "Use $windows-powershell-guard when running shell commands or editing files on Windows PowerShell."
