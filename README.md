@@ -25,6 +25,11 @@ codex-skills/
         openai.yaml
       scripts/
         reset_credit_monitor.py
+    windows-powershell-guard/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
 ```
 
 这个仓库采用聚合式结构：仓库根目录只放整体说明和通用配置，所有可用的 Codex skill 都放在 `skills/` 下。每个 skill 都是一个相对独立的单元，可以单独复制、安装和使用。
@@ -37,6 +42,7 @@ codex-skills/
 | --- | --- | --- |
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
 | `codex-reset-credit-monitor` | `$codex-reset-credit-monitor` | 查看 Codex reset credit 数量、到期时间、历史变化，并维护 Windows 计划任务监控。 |
+| `windows-powershell-guard` | `$windows-powershell-guard` | 降低 Codex 在 Windows PowerShell、中文编码、路径操作和 shell 命令中的常见失败。 |
 
 ### codex-status-check
 
@@ -49,6 +55,12 @@ codex-skills/
 `codex-reset-credit-monitor` 用于查看当前可用的 Codex reset credit 数量、每次机会的到期时间，以及当前 Codex 用量窗口。它可以记录本地快照历史，并根据历史数据解释 reset credit 数量变化和临期风险。
 
 它还支持生成和维护 Windows 计划任务，用固定周期在本机记录 reset credit 状态。这个 skill 会读取本机 Codex 登录态并向 ChatGPT backend 发起只读请求，不调用模型，也不会输出 token、原始 `auth.json`、邮箱地址、user id 或 account id。
+
+### windows-powershell-guard
+
+`windows-powershell-guard` 用于约束 Codex 在 Windows PowerShell 下执行命令和编辑文件时的高风险行为，尤其是中文路径、中文文件、中文日志、脚本输出编码、JSON 传参、路径安全、删除/移动文件、跨 shell 操作和 shell 启动异常等场景。
+
+它会提醒 Codex 优先使用 `apply_patch` 做手工编辑，避免默认 `echo`、`Set-Content`、`Out-File` 或重定向写中文内容；执行路径敏感操作时优先使用 `-LiteralPath` 并验证目标路径；遇到 `UnicodeDecodeError`、`CreateProcessWithLogonW failed: 1326`、`pwsh.exe` alias 等 Windows 环境问题时，先按环境和编码问题排查，而不是反复重跑同一命令。
 
 ## How To Use These Skills
 

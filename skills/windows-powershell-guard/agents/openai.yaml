@@ -1,0 +1,4 @@
+interface:
+  display_name: "Windows PowerShell 防护"
+  short_description: "降低 Codex 在 Windows PowerShell、中文编码和路径操作中的常见失败。"
+  default_prompt: "Use $windows-powershell-guard when running shell commands or editing files on Windows PowerShell."
