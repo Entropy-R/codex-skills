@@ -1,0 +1,29 @@
+{
+  "local-projects": {
+    "project-a": {
+      "label": "Project A",
+      "path": "C:\\Projects\\A"
+    },
+    "project-b": {
+      "label": "Project B",
+      "path": "C:\\Projects\\B"
+    }
+  },
+  "remote-projects": [],
+  "thread-project-assignments": {
+    "thread-a": {
+      "projectKind": "local",
+      "projectId": "project-a"
+    },
+    "thread-b": {
+      "projectKind": "local",
+      "projectId": "project-a"
+    }
+  },
+  "projectless-thread-ids": [
+    "thread-c"
+  ],
+  "unrelated-state": {
+    "mustRemain": true
+  }
+}

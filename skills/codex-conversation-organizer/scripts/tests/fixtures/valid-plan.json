@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "planId": "fixture-plan-001",
+  "createdAt": "2026-08-19T00:00:00Z",
+  "classificationPolicy": {
+    "originalUserText": "Put the selected conversations in Project B.",
+    "interpretedSummary": [
+      "Only the two explicitly selected conversations are reassigned."
+    ]
+  },
+  "approval": {
+    "confirmed": true,
+    "confirmedAt": "2026-08-19T00:01:00Z"
+  },
+  "operations": [
+    {
+      "threadId": "thread-a",
+      "action": "reassign",
+      "currentAssignment": {
+        "projectKind": "local",
+        "projectId": "project-a"
+      },
+      "targetAssignment": {
+        "projectKind": "local",
+        "projectId": "project-b"
+      },
+      "classification": {
+        "status": "clear",
+        "reason": "The user explicitly selected this conversation for Project B."
+      },
+      "approved": true
+    },
+    {
+      "threadId": "thread-c",
+      "action": "reassign",
+      "currentAssignment": null,
+      "targetAssignment": {
+        "projectKind": "local",
+        "projectId": "project-b"
+      },
+      "classification": {
+        "status": "clear",
+        "reason": "The user explicitly selected this projectless conversation for Project B."
+      },
+      "approved": true
+    },
+    {
+      "threadId": "thread-d",
+      "action": "reassign",
+      "currentAssignment": null,
+      "targetAssignment": {
+        "projectKind": "local",
+        "projectId": "project-b"
+      },
+      "classification": {
+        "status": "clear",
+        "reason": "The user selected this legacy unmapped conversation for Project B."
+      },
+      "approved": true
+    }
+  ]
+}

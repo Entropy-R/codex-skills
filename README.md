@@ -30,6 +30,14 @@ codex-skills/
       SKILL.md
       agents/
         openai.yaml
+    codex-conversation-organizer/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
+      references/
+      scripts/
+        tests/
     requirement-intake/
       README.md
       SKILL.md
@@ -85,6 +93,7 @@ codex-skills/
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
 | `codex-reset-credit-monitor` | `$codex-reset-credit-monitor` | 查看 Codex reset credit 数量、到期时间、历史变化，并维护 Windows 计划任务监控。 |
 | `windows-powershell-guard` | `$windows-powershell-guard` | 降低 Codex 在 Windows PowerShell、中文编码、路径操作和 shell 命令中的常见失败。 |
+| `codex-conversation-organizer` | `$codex-conversation-organizer` | 按自然语言规则盘点、分类并迁移 Codex 对话的项目归属，默认保留原对话。 |
 | `requirement-intake` | `$requirement-intake` | 三段开发 01：整理非结构化需求，主动澄清关键问题。 |
 | `solution-design` | `$solution-design` | 三段开发 02：把澄清后的需求转换为工程实现方案。 |
 | `solution-review` | `$solution-review` | 三段开发 03：审查方案风险并整理最终可执行计划。 |
@@ -111,6 +120,12 @@ codex-skills/
 `windows-powershell-guard` 用于约束 Codex 在 Windows PowerShell 下执行命令和编辑文件时的高风险行为，尤其是中文路径、中文文件、中文日志、脚本输出编码、JSON 传参、路径安全、删除/移动文件、跨 shell 操作和 shell 启动异常等场景。
 
 它会提醒 Codex 优先使用 `apply_patch` 做手工编辑，避免默认 `echo`、`Set-Content`、`Out-File` 或重定向写中文内容；执行路径敏感操作时优先使用 `-LiteralPath` 并验证目标路径；遇到 `UnicodeDecodeError`、`CreateProcessWithLogonW failed: 1326`、`pwsh.exe` alias 等 Windows 环境问题时，先按环境和编码问题排查，而不是反复重跑同一命令。
+
+### codex-conversation-organizer
+
+`codex-conversation-organizer` 用于按照用户本次提供的自然语言规则整理已有 Codex 对话。它先盘点和分类，单独列出冲突与证据不足项；用户确认具体线程和目标项目后，才准备迁移计划。
+
+历史对话可以保留原线程 ID 重新归类，也可以在目标项目创建接续任务。重新归类采用离线、带备份和逐项校验的本地状态更新，不修改对话正文、SQLite 或工作目录。默认保留原对话；当前没有受支持的永久删除接口。该 Skill 目前仅支持并验证 Windows 10、PowerShell 7 和本地 Codex Desktop。
 
 ### 三段开发工作流
 

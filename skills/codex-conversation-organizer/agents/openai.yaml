@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex 对话迁移与项目整理"
+  short_description: "按自然语言规则审计并整理 Codex 对话的项目归属"
+  default_prompt: "使用“Codex 对话迁移与项目整理”（$codex-conversation-organizer）按我的中文自然语言规则整理对话，先生成低 Token 分类预览，不要直接迁移。"
+
+policy:
+  allow_implicit_invocation: true
