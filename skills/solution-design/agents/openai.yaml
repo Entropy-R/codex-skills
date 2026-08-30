@@ -1,4 +1,6 @@
 interface:
   display_name: "三段开发 02 实现方案设计"
-  short_description: "基于澄清结果把需求转换为清晰可执行工程落地实施方案"
-  default_prompt: "请使用实现方案设计技能，基于第一阶段输出和我的补充回答生成工程实现方案。"
+  short_description: "基于已确认需求生成复杂度受控、可验证且决策完整的工程方案"
+  default_prompt: "请使用 $solution-design 基于已确认需求和仓库事实，生成一份复杂度受控且决策完整的工程方案。"
+policy:
+  allow_implicit_invocation: true
