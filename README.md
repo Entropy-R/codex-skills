@@ -30,6 +30,14 @@ codex-skills/
       SKILL.md
       agents/
         openai.yaml
+    lieflat-less-ai-tone/
+      README.md
+      README.en.md
+      RESEARCH.md
+      RESEARCH.en.md
+      SKILL.md
+      assets/
+      scripts/
     codex-conversation-organizer/
       README.md
       SKILL.md
@@ -93,6 +101,7 @@ codex-skills/
 | `codex-status-check` | `$codex-status-check` | 查询当前 Codex 版本、同通道可升级版本、升级差异、官方产品更新和 GitHub 工程发布参考。 |
 | `codex-reset-credit-monitor` | `$codex-reset-credit-monitor` | 查看 Codex reset credit 数量、到期时间、历史变化，并维护 Windows 计划任务监控。 |
 | `windows-powershell-guard` | `$windows-powershell-guard` | 降低 Codex 在 Windows PowerShell、中文编码、路径操作和 shell 命令中的常见失败。 |
+| `lieflat-less-ai-tone` | `$lieflat-less-ai-tone` | 按可定位的白名单规则清理中文成稿中的 AI 写作痕迹，同时保持结构和信息不变。 |
 | `codex-conversation-organizer` | `$codex-conversation-organizer` | 按自然语言规则盘点、分类并迁移 Codex 对话的项目归属，默认保留原对话。 |
 | `requirement-intake` | `$requirement-intake` | 三段开发 01：整理非结构化需求，主动澄清关键问题。 |
 | `solution-design` | `$solution-design` | 三段开发 02：把澄清后的需求转换为工程实现方案。 |
