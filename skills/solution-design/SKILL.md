@@ -68,5 +68,5 @@ description: 基于已确认需求和仓库事实，为涉及跨模块、公共�
 
 ## 平台兼容性
 
-- 支持平台：Windows + macOS。
+- 支持平台：Windows + macOS + Linux。
 - 方案中的命令、路径和部署方式必须明确目标系统。

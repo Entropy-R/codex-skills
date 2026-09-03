@@ -1,0 +1,4 @@
+interface:
+  display_name: "前端页面开发"
+  short_description: "先规划再实现 React 与 Umi Max 业务页面"
+  default_prompt: "请使用 $frontend-page-development，为当前项目设计并实现这个前端页面。"

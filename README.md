@@ -61,6 +61,11 @@ codex-skills/
       SKILL.md
       agents/
         openai.yaml
+    frontend-page-development/
+      README.md
+      SKILL.md
+      agents/
+        openai.yaml
     doc-source-analysis/
       README.md
       SKILL.md
@@ -106,6 +111,7 @@ codex-skills/
 | `requirement-intake` | `$requirement-intake` | 三段开发 01：整理非结构化需求，主动澄清关键问题。 |
 | `solution-design` | `$solution-design` | 三段开发 02：把澄清后的需求转换为工程实现方案。 |
 | `solution-review` | `$solution-review` | 三段开发 03：审查方案风险并整理最终可执行计划。 |
+| `frontend-page-development` | `$frontend-page-development` | 前端页面开发：先检查项目与规划，再实现 React、Umi Max 业务页面。 |
 | `doc-source-analysis` | `$doc-source-analysis` | 文档编写 01：解读技术协议和客户资料，提炼事实、术语、风险和待确认项。 |
 | `doc-template-outline` | `$doc-template-outline` | 文档编写 02：适配客户模板并生成目录、大纲和章节写作说明。 |
 | `doc-drafting` | `$doc-drafting` | 文档编写 03：基于大纲和资料解读结果起草正文。 |
@@ -141,6 +147,10 @@ codex-skills/
 三段开发工作流包含 `requirement-intake`、`solution-design` 和 `solution-review`，用于把不完整的软件需求逐步整理成可执行交付计划。
 
 推荐顺序是先用 `requirement-intake` 澄清需求，再用 `solution-design` 生成工程方案，最后用 `solution-review` 审查风险并固化最终实施计划。
+
+### 前端页面开发
+
+`frontend-page-development` 面向现有 TypeScript + React 前端项目的业务页面和管理后台页面开发，尤其适用于 Umi Max。它会先检查路由、UI 组件、请求封装、样式规范和既有页面，先输出最小可行方案，再按照静态 UI、视觉调整、交互、真实 API 与必要页面状态的顺序实施。
 
 ### 文档编写工作流
 
